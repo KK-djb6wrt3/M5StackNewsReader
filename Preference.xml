@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Preference>
+  <AccessPoints>
+    <AP>
+      <SSID>SSID1</SSID>
+      <Password>password1</Password>
+    </AP>
+    <AP>
+      <SSID>SSID2</SSID>
+      <Password>password</Password>
+    </AP>
+  </AccessPoints>
+  <Background>
+    <Image>
+      <File>/BG/BG01.jpg</File>
+      <Balloon>LT</Balloon>
+    </Image>
+    <Image>
+      <File>/BG/BG02.jpg</File>
+      <Balloon>LB</Balloon>
+    </Image>
+    <Image>
+      <File>/BG/BG03.jpg</File>
+      <Balloon>RT</Balloon>
+    </Image>
+    <Image>
+      <File>/BG/BG04.jpg</File>
+      <Balloon>RB</Balloon>
+    </Image>
+  </Background>
+</Preference>
