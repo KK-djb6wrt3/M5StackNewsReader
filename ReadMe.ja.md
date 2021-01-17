@@ -1,6 +1,6 @@
 # M5Stack News Reader
 Yahoo!ニュースをRSSから取得し、M5Stackに表示します。
-* [Readme.md](ReadMe.md)
+* [README.md](/README.md)
 
 # 機能
 Yahoo!ニュースの主要トピックを取得し、タイトルと詳細をスクロールして表示します。
