@@ -1,5 +1,6 @@
 # M5Stack News Reader
 Yahoo!ニュースをRSSから取得し、M5Stackに表示します。
+* [ReadMe.md](ReadMe.md)
 
 # 機能
 Yahoo!ニュースの主要トピックを取得し、タイトルと詳細をスクロールして表示します。
@@ -20,3 +21,6 @@ Preference.xmlを変更し、microSDのルートフォルダに置く必要が�
 アクセスポイントや背景画像の数に制限は設けていませんが、あまり多いとメモリが足りなくなる可能性があります。
 
 BtnAを押すと現在表示しているニュースを先頭から表示します。
+
+# ライセンス
+M5Stack News Readerは[MITライセンス](https://en.wikipedia.org/wiki/MIT_License)で配布されています
