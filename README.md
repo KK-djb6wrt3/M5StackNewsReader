@@ -1,22 +1,22 @@
 # M5Stack News Reader
-Yahoo!ニュースをRSSから取得し、M5Stackに表示します。
+It gets RSS from Yahoo! news, and shows them on M5Stack.
 
-# 機能
-Yahoo!ニュースの主要トピックを取得し、タイトルと詳細をスクロールして表示します。
-また、任意の背景画像を表示することができ、1トピック毎に変更することができます。
-また、バッテリー状態も表示します。
+# Features
+It gets RSS from Yahoo! news, and shows title & descrition with ticker.
+And it can display any images, and change it by each topics.
+It also shows battery status.
 
-# 依存関係
+# Requirement
 * [efont](https://github.com/tanakamasayuki/efont.git)
 
-# 使用方法
-Preference.xmlを変更し、microSDのルートフォルダに置く必要があります。
+# Usage
+You must change 'Preference.xml', and place it on root of microSD.
 ```
-<SSID> #アクセスポイントのSSID
-<Password> #パスワード
-<File> #背景画像のファイル名
-<Balloon> #吹き出しの位置。LT:左上 RT:右上, LB:左下, RB:右下
+<SSID> #SSID of an access point which you want to connect
+<Password> #Password
+<File> #File name of backgroun
+<Balloon> #Position of balloon LT:Left-Top RT:Right-Top, LB:Left-Bottom, RB:Right-Bottom
 ```
-アクセスポイントや背景画像の数に制限は設けていませんが、あまり多いとメモリが足りなくなる可能性があります。
+It doesn't limit the number of access points, and background. But if it's too much, it'll be insufficient RAM.
 
-BtnAを押すと現在表示しているニュースを先頭から表示します。
+When you pushes BtnA, it shows the current news from head.
