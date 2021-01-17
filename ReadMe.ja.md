@@ -20,7 +20,10 @@ Preference.xmlを変更し、microSDのルートフォルダに置く必要が�
 ```
 アクセスポイントや背景画像の数に制限は設けていませんが、あまり多いとメモリが足りなくなる可能性があります。
 
-BtnAを押すと現在表示しているニュースを先頭から表示します。
+BtnAを押すと現在表示しているトピックを先頭から表示します。
+BtnAを長押しするとスリープモードに入ります。
+BtnCを押すと次のトピックを表示します。
+BtnCを長押しすると詳細記事へのリンクをQRコードで表示します。
 
 # ライセンス
-M5Stack News Readerは[MITライセンス](https://en.wikipedia.org/wiki/MIT_License)で配布されています
+M5Stack News Readerは[MITライセンス](https://en.wikipedia.org/wiki/MIT_License)で配布されています。
