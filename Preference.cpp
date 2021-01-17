@@ -21,6 +21,7 @@ class PrefImpl {
     PrefImpl(void) {
       m_pImage = NULL;
       m_pAP = NULL;
+      m_isLoaded = false;
       m_eStage = RS_None;
     }
 
@@ -56,9 +57,15 @@ class PrefImpl {
           XML_ParserFree(parser);
         }
         file.close();
+        m_isLoaded = true;
         return true;
       }
+      m_isLoaded = false;
       return false;
+    }
+
+    bool isLoaded(void) const {
+      return m_isLoaded;
     }
 
     int getApNum(void) const {
@@ -131,6 +138,7 @@ class PrefImpl {
     Image_t* m_pImage;
     std::vector<AP_t*> m_APs;
     AP_t* m_pAP;
+    bool m_isLoaded;
 
   private:
     static void _startElem(void* pUsrData, const XML_Char* pElem, const XML_Char* ppAttr[]) {
@@ -341,6 +349,10 @@ Preference::~Preference(void) {
 
 bool Preference::load(const char* pFileName) {
   return m_pImpl->load(pFileName);
+}
+
+bool Preference::isLoaded(void) const {
+  return m_pImpl->isLoaded();
 }
 
 int Preference::getApNum(void) const {

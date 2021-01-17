@@ -10,6 +10,7 @@ class IState {
       SID_Home,
       SID_QRCode,
       SID_Menu,
+      SID_Sleep,
     };
 
   public:

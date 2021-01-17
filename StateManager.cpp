@@ -1,8 +1,14 @@
 #include "StateManager.h"
 
 #include "Home.h"
+#include "Sleep.h"
+#include "QRCode.h"
 
 static Home s_Home;
+static Sleep s_Sleep;
+static QRCode s_QRCode;
+
+const char* QRCode::m_pLink = NULL;
 
 StateManager::StateManager(void) {
   m_pCurState = NULL;
@@ -58,6 +64,11 @@ void StateManager::changeState(IState::StateID eID) {
     case IState::SID_Home:
       pNewState = &s_Home;
       break;
+    case IState::SID_Sleep:
+      pNewState = &s_Sleep;
+      break;
+    case IState::SID_QRCode:
+      pNewState = &s_QRCode;
     default:
       break;
   }
@@ -73,6 +84,7 @@ void StateManager::changeState(IState::StateID eID) {
       pNewState->onInitialized();
       pNew = pNewState->getName();
     }
+    Serial.printf("%s > %s\n", pCur, pNew);
     m_pCurState = pNewState;
   }
 }

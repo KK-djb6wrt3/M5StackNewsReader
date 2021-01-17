@@ -7,6 +7,7 @@
 
 #include "Icons.h"
 #include "Utility.h"
+#include "QRCode.h"
 
 #define COLOR565(r, g, b) (((r) & 0xF8) << 8) | (((g) & 0xFC) << 3) | ((b) >> 3)
 #define TFT_LIGHT_YELLOW COLOR565(250, 240, 139)
@@ -17,8 +18,44 @@
 Home::Home(void)
   : IState("Home")
   , m_etTitle(M5.Lcd, 144, 16)
-  , m_etDesc(M5.Lcd, 144, 32)
-{
+  , m_etDesc(M5.Lcd, 144, 32) {
+  clean();
+}
+
+Home::~Home(void) {
+}
+
+void Home::onInitialized(void) {
+  bool isGetNews = false;
+  if (m_Pref.isLoaded() == false) {
+    isGetNews = true;
+    if (m_Pref.load("/Preference.xml") == false) {
+      M5.Lcd.println("Can't open Preference.xml");
+      for (;;) {
+        delay(portMAX_DELAY);
+      }
+    }
+    if (findAccessPoint() == false) {
+      M5.Lcd.print(F("Can't find any access points to connect."));
+      for (;;) {
+        delay(portMAX_DELAY);
+      }
+    }
+  }
+
+  M5.Lcd.setTextColor(TFT_BLACK, TFT_LIGHT_YELLOW);
+  loadImage();
+
+  m_etTitle.setTextColor(TFT_BLACK, TFT_LIGHT_YELLOW);
+  m_etDesc.setTextColor(TFT_BLACK, TFT_LIGHT_YELLOW);
+  m_etDesc.setScale(2);
+
+if(isGetNews){
+  getNews();
+}
+}
+
+void Home::clean(void) {
   m_NewsIdx = 0;
   m_LoopCt = 0;
   m_WholeLoopCt = 0;
@@ -33,23 +70,52 @@ Home::Home(void)
   m_pPassword = NULL;
 }
 
-Home::~Home(void) {
+void Home::forward(void) {
+  m_LoopCt = 0;
+  if (m_WholeLoopCt >= WHOLE_LOOP_MAX) {
+    m_WholeLoopCt = 0;
+    getNews();
+  }
+  loadImage();
+  nextNews();
 }
 
-void Home::onInitialized(void) {
+IState::StateID Home::onLoop(void) {
+  m_etTitle.render(m_Rect.x, m_Rect.y);
+  if (m_etDesc.render(m_Rect.x, (m_Rect.y + 20))) {
+    if (++m_LoopCt >= LOOP_MAX) {
+      forward();
+    }
+  }
+  drawBattery();
+  return SID_Current;
+}
+
+IState::StateID Home::onPressBtnA(bool isLong) {
+  m_LoopCt = 0;
+  m_etTitle.resetPos();
+  m_etDesc.resetPos();
+  return isLong ? SID_Sleep : SID_Current;
+}
+
+IState::StateID Home::onPressBtnC(bool isLong) {
+  if (isLong == false) {
+    forward();
+    return SID_Current;
+  }
+  else {
+    return SID_QRCode;
+  }
+}
+
+
+bool Home::findAccessPoint(void) {
+  bool isFound = false;
   std::vector<const char*> accesspoints;
   int numAP = WiFi.scanNetworks();
   for (int i = 0; i < numAP; i++) {
     accesspoints.push_back(duplicateString(WiFi.SSID(i)));
   }
-
-  if (m_Pref.load("/Preference.xml") == false) {
-    M5.Lcd.println("Can't open Preference.xml");
-    for (;;) {
-      delay(portMAX_DELAY);
-    }
-  }
-  bool isFound = false;
   int num = m_Pref.getApNum();
   const char* pSSID = NULL;
   const char* pPassword = NULL;
@@ -69,45 +135,7 @@ void Home::onInitialized(void) {
     SAFE_DELETE(pAP);
   }
   accesspoints.clear();
-
-  if (m_pSSID == NULL) {
-    M5.Lcd.print(F("Can't find any access points to connect."));
-  }
-
-  M5.Lcd.setTextColor(TFT_BLACK, TFT_LIGHT_YELLOW);
-  loadImage();
-
-  m_etTitle.setTextColor(TFT_BLACK, TFT_LIGHT_YELLOW);
-  m_etDesc.setTextColor(TFT_BLACK, TFT_LIGHT_YELLOW);
-  m_etDesc.setScale(2);
-
-  getNews();
-}
-
-IState::StateID Home::onLoop(void) {
-  m_etTitle.render(m_Rect.x, m_Rect.y);
-  if (m_etDesc.render(m_Rect.x, (m_Rect.y + 20))) {
-    if (++m_LoopCt >= LOOP_MAX) {
-      m_LoopCt = 0;
-      if (m_WholeLoopCt >= WHOLE_LOOP_MAX) {
-        m_WholeLoopCt = 0;
-        getNews();
-      }
-      loadImage();
-      nextNews();
-    }
-  }
-
-  drawBattery();
-
-  return SID_Home;
-}
-
-IState::StateID Home::onPressBtnA(bool isLong) {
-  m_LoopCt = 0;
-  m_etTitle.resetPos();
-  m_etDesc.resetPos();
-  return SID_Home;
+  return isFound;
 }
 
 void Home::getStatusArea(Rect_t* pRect) {
@@ -124,10 +152,12 @@ void Home::nextNews(void) {
   if (num > 0) {
     const char* pTitle = NULL;
     const char* pDesc = NULL;
-    if (m_NewsReader.getEntry(m_NewsIdx, &pTitle, &pDesc, NULL)) {
+    const char* pLink = NULL;
+    if (m_NewsReader.getEntry(m_NewsIdx, &pTitle, &pDesc, &pLink)) {
       m_etTitle.setText(pTitle);
       m_etDesc.setText(pDesc);
     }
+    QRCode::setLink(pLink);
 
     char pStr[6];
     Rect_t rcStat = {};

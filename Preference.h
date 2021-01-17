@@ -23,6 +23,7 @@ class Preference {
     Preference(void);
     virtual ~Preference(void);
     bool load(const char* pFileName);
+    bool isLoaded(void) const;
     int getApNum(void) const;
     bool getAP(int index, const char** ppSSID, const char** ppPassword) const;
     int getImageNum(void) const;
@@ -30,6 +31,5 @@ class Preference {
 
   private:
     class PrefImpl* m_pImpl;
-
 };
 #endif //_PREFERENCE_H_

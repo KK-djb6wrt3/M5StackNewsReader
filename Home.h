@@ -16,6 +16,7 @@ class Home : public IState {
 
     virtual StateID onLoop(void) override;
     virtual StateID onPressBtnA(bool isLong) override;
+    virtual StateID onPressBtnC(bool isLong) override;
 
   private:
     struct Rect_t {
@@ -43,5 +44,8 @@ class Home : public IState {
     void drawBattery(void);
     void loadImage(void);
     bool getNews(void);
+    void forward(void);
+    void clean(void);
+    bool findAccessPoint(void);
 };
 #endif //_HOME_H_
