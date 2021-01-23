@@ -9,9 +9,9 @@ class QRCode : public IState {
     virtual ~QRCode(void) {}
 
     virtual void onInitialized(void) override {
-      M5.Lcd.clear();
+    	pushDrawCmd(new Clear());
       if (m_pLink != NULL) {
-        M5.Lcd.qrcode(m_pLink);
+      	pushDrawCmd(new DrawQrCode(m_pLink));
       }
     }
 

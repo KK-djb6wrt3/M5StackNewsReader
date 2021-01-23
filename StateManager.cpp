@@ -55,6 +55,20 @@ void StateManager::onPressBtnC(bool isLong) {
   }
 }
 
+void StateManager::onBatteryChanged(bool isCharging, int8_t level){
+  if (m_pCurState != NULL) {
+    changeState(m_pCurState->onBatteryChanged(isCharging, level));
+  }
+}
+
+bool StateManager::popDrawCommand(ICommand** ppCmd) {
+  bool isGot = false;
+  if (m_pCurState != NULL) {
+    isGot = m_pCurState->popDrawCmd(ppCmd);
+  }
+  return isGot;
+}
+
 void StateManager::changeState(IState::StateID eID) {
   IState* pNewState = NULL;
   switch (eID) {
@@ -84,7 +98,6 @@ void StateManager::changeState(IState::StateID eID) {
       pNewState->onInitialized();
       pNew = pNewState->getName();
     }
-    Serial.printf("%s > %s\n", pCur, pNew);
     m_pCurState = pNewState;
   }
 }

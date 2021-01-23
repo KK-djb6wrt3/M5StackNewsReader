@@ -1,24 +1,22 @@
 #include "Home.h"
 
-#include <M5Stack.h>
 #include <WiFi.h>
 
 #include <vector>
 
-#include "Icons.h"
+#include "Resource.h"
 #include "Utility.h"
 #include "QRCode.h"
 
 #define COLOR565(r, g, b) (((r) & 0xF8) << 8) | (((g) & 0xFC) << 3) | ((b) >> 3)
 #define TFT_LIGHT_YELLOW COLOR565(250, 240, 139)
+#define TFT_BLACK COLOR565(0, 0, 0)
 
 #define LOOP_MAX (3)
 #define WHOLE_LOOP_MAX (5)
 
 Home::Home(void)
-  : IState("Home")
-  , m_etTitle(M5.Lcd, 144, 16)
-  , m_etDesc(M5.Lcd, 144, 32) {
+  : IState("Home") {
   clean();
 }
 
@@ -30,29 +28,35 @@ void Home::onInitialized(void) {
   if (m_Pref.isLoaded() == false) {
     isGetNews = true;
     if (m_Pref.load("/Preference.xml") == false) {
-      M5.Lcd.println("Can't open Preference.xml");
+      pushDrawCmd(new DrawStr(0, 0, F("Can't open Preference.xml")));
       for (;;) {
         delay(portMAX_DELAY);
       }
     }
     if (findAccessPoint() == false) {
-      M5.Lcd.print(F("Can't find any access points to connect."));
+      pushDrawCmd(new DrawStr(0, 0, F("Can't find any access points to connect.")));
       for (;;) {
         delay(portMAX_DELAY);
       }
     }
   }
 
-  M5.Lcd.setTextColor(TFT_BLACK, TFT_LIGHT_YELLOW);
+  pushDrawCmd(new TickerCreate(TickerBase::TID_0, 144, 16));
+  pushDrawCmd(new TickerSetParam(TickerBase::TID_0, 1, TFT_BLACK, TFT_LIGHT_YELLOW));
+
+  pushDrawCmd(new TickerCreate(TickerBase::TID_1, 144, 32));
+  pushDrawCmd(new TickerSetParam(TickerBase::TID_1, 2, TFT_BLACK, TFT_LIGHT_YELLOW));
+
+  pushDrawCmd(new SetTextColor(TFT_BLACK, TFT_LIGHT_YELLOW));
   loadImage();
 
-  m_etTitle.setTextColor(TFT_BLACK, TFT_LIGHT_YELLOW);
-  m_etDesc.setTextColor(TFT_BLACK, TFT_LIGHT_YELLOW);
-  m_etDesc.setScale(2);
-
-if(isGetNews){
-  getNews();
+  if (isGetNews) {
+    getNews();
+  }
 }
+void Home::onTerminated(void) {
+  pushDrawCmd(new TickerDelete(TickerBase::TID_0));
+  pushDrawCmd(new TickerDelete(TickerBase::TID_1));
 }
 
 void Home::clean(void) {
@@ -60,8 +64,8 @@ void Home::clean(void) {
   m_LoopCt = 0;
   m_WholeLoopCt = 0;
   m_ImgIdx = 0;
-  m_PrevBatLv = -1;
-  m_isPrevCharge = false;
+  m_BatteryLv = -1;
+  m_isCharging = false;
   m_Rect.x = 0;
   m_Rect.y = 0;
   m_Rect.width = 144;
@@ -80,21 +84,33 @@ void Home::forward(void) {
   nextNews();
 }
 
-IState::StateID Home::onLoop(void) {
-  m_etTitle.render(m_Rect.x, m_Rect.y);
-  if (m_etDesc.render(m_Rect.x, (m_Rect.y + 20))) {
+void Home::_renderCBR(bool isWrap, void* pUsrParam) {
+  Home* pHome = (Home*)pUsrParam;
+  if (pHome != NULL) {
+    pHome->renderCBR(isWrap);
+  }
+}
+
+void Home::renderCBR(bool isWrap) {
+  if (isWrap) {
     if (++m_LoopCt >= LOOP_MAX) {
       forward();
     }
   }
+}
+
+IState::StateID Home::onLoop(void) {
+  pushDrawCmd(new TickerRender(TickerBase::TID_0, m_Rect.x, m_Rect.y));
+  pushDrawCmd(new TickerRender(TickerBase::TID_1, m_Rect.x, (m_Rect.y + 20), _renderCBR, (void*)this));
+
   drawBattery();
   return SID_Current;
 }
 
 IState::StateID Home::onPressBtnA(bool isLong) {
   m_LoopCt = 0;
-  m_etTitle.resetPos();
-  m_etDesc.resetPos();
+  pushDrawCmd(new TickerResetPos(TickerBase::TID_0));
+  pushDrawCmd(new TickerResetPos(TickerBase::TID_1));
   return isLong ? SID_Sleep : SID_Current;
 }
 
@@ -107,7 +123,14 @@ IState::StateID Home::onPressBtnC(bool isLong) {
     return SID_QRCode;
   }
 }
-
+IState::StateID Home::onBatteryChanged(bool isCharging, int8_t level) {
+  if ((level != m_BatteryLv) || (isCharging != m_isCharging)) {
+    m_BatteryLv = level;
+    m_isCharging = isCharging;
+    drawBattery();
+  }
+  return SID_Current;
+}
 
 bool Home::findAccessPoint(void) {
   bool isFound = false;
@@ -154,16 +177,16 @@ void Home::nextNews(void) {
     const char* pDesc = NULL;
     const char* pLink = NULL;
     if (m_NewsReader.getEntry(m_NewsIdx, &pTitle, &pDesc, &pLink)) {
-      m_etTitle.setText(pTitle);
-      m_etDesc.setText(pDesc);
+      pushDrawCmd(new TickerSetText(TickerBase::TID_0, pTitle));
+      pushDrawCmd(new TickerSetText(TickerBase::TID_1, pDesc));
     }
     QRCode::setLink(pLink);
 
-    char pStr[6];
+    static char spStr[6];
     Rect_t rcStat = {};
     getStatusArea(&rcStat);
-    sprintf(pStr, "%u/%u", (m_NewsIdx + 1), num);
-    M5.Lcd.drawString(pStr, rcStat.x, rcStat.y, 1);
+    sprintf(spStr, "%u/%u", (m_NewsIdx + 1), num);
+    pushDrawCmd(new DrawStr(rcStat.x, rcStat.y, spStr));
 
     if (++m_NewsIdx >= num) {
       m_NewsIdx = 0;
@@ -173,42 +196,33 @@ void Home::nextNews(void) {
 }
 
 void Home::drawBattery(void) {
-  if (M5.Power.canControl()) {
-    int8_t batLv = M5.Power.getBatteryLevel();
-    bool isCharge = M5.Power.isCharging();
-    if ((batLv != m_PrevBatLv) || (isCharge != m_isPrevCharge)) {
-      m_PrevBatLv = batLv;
-      m_isPrevCharge = isCharge;
-      const uint16_t* pBatLv = NULL;
-      switch (batLv) {
-        case 100:
-          pBatLv = (isCharge ? s_pChrgLv100 : s_pBatLv100);
-          break;
-        case 75:
-          pBatLv = (isCharge ? s_pChrgLv75 : s_pBatLv75);
-          break;
-        case 50:
-          pBatLv = (isCharge ? s_pChrgLv50 : s_pBatLv50);
-          break;
-        case 25:
-          pBatLv = (isCharge ? s_pChrgLv25 : s_pBatLv25);
-          break;
-        default:
-          pBatLv = NULL;
-          break;
-      }
-      if (pBatLv != NULL) {
-        Rect_t rcStat = {};
-        getStatusArea(&rcStat);
-        int x = (rcStat.x + rcStat.width - 16);
-        int y = rcStat.y;
-        M5.Lcd.fillRect(x, y, 16, 8, TFT_LIGHT_YELLOW);
-        M5.Lcd.drawBitmap(x, y, 16, 8, pBatLv, 0xF81F);
-      }
-    }
+  IconID eID = ICN_UNKNOWN;
+  switch (m_BatteryLv) {
+    case 100:
+      eID = (m_isCharging ? ICN_CHRG_FULL : ICN_BATT_FULL);
+      break;
+    case 75:
+      eID = (m_isCharging ? ICN_CHRG_75 : ICN_BATT_75);
+      break;
+    case 50:
+      eID = (m_isCharging ? ICN_CHRG_50 : ICN_BATT_50);
+      break;
+    case 25:
+      eID = (m_isCharging ? ICN_CHRG_25 : ICN_BATT_25);
+      break;
+    default:
+      break;
   }
-  else {
-    Serial.println(F("can't ctrl"));
+  if (eID != ICN_UNKNOWN) {
+    Rect_t rcStat = {};
+    getStatusArea(&rcStat);
+    const int x = (rcStat.x + rcStat.width - 16);
+    const int y = rcStat.y;
+    const int w = 16;
+    const int h = 8;
+
+    pushDrawCmd(new FillRect(x, y, w, h, TFT_LIGHT_YELLOW));
+    pushDrawCmd(new DrawBmp(x, y, eID, 0xF81F));
   }
 }
 
@@ -218,7 +232,7 @@ void Home::loadImage(void) {
     const char* pFile = NULL;
     Preference::BalloonPos ePos = Preference::BP_LeftTop;
     if (m_Pref.getImage(m_ImgIdx, &pFile, &ePos)) {
-      M5.Lcd.drawJpgFile(SD, pFile);
+      pushDrawCmd(new DrawJpgFile(DrawJpgFile::SD, pFile));
       switch (ePos) {
         case Preference::BP_LeftBottom:
           m_Rect.x = 10;
@@ -237,10 +251,8 @@ void Home::loadImage(void) {
           m_Rect.y = 20;
           break;
       }
-      M5.Lcd.fillRoundRect(m_Rect.x, (m_Rect.y - 10), m_Rect.width, (m_Rect.height + 25), 10, TFT_LIGHT_YELLOW);
-
-      m_PrevBatLv = -1;
-      m_isPrevCharge = false;
+      pushDrawCmd(new FillRoundRect(m_Rect.x, (m_Rect.y - 10), m_Rect.width, (m_Rect.height + 25), 10, TFT_LIGHT_YELLOW));
+      drawBattery();
     }
     if (++m_ImgIdx >= imgNum) {
       m_ImgIdx = 0;

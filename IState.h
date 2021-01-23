@@ -3,39 +3,39 @@
 
 #include <stddef.h>
 
+#include "Command.h"
+
 class IState {
   public:
-    enum StateID {
-    	SID_Current,
-      SID_Home,
-      SID_QRCode,
-      SID_Menu,
-      SID_Sleep,
-    };
+	enum StateID {
+	  SID_Current,
+	  SID_Home,
+	  SID_QRCode,
+	  SID_Menu,
+	  SID_Sleep,
+	};
 
   public:
-    virtual void onInitialized(void) {}
-    virtual void onTerminated(void) {}
+	virtual ~IState(void);
 
-    virtual StateID onLoop(void) = 0;
-    virtual StateID onPressBtnA(bool isLong) {
-      return SID_Current;
-    }
-    virtual StateID onPressBtnB(bool isLongoid) {
-      return SID_Current;
-    }
-    virtual StateID onPressBtnC(bool isLong) {
-      return SID_Current;
-    }
+	virtual void onInitialized(void);
+	virtual void onTerminated(void);
+	virtual StateID onLoop(void) = 0;
+	virtual StateID onPressBtnA(bool isLong);
+	virtual StateID onPressBtnB(bool isLongoid);
+	virtual StateID onPressBtnC(bool isLong);
+	virtual StateID onBatteryChanged(bool isCharging, int8_t level);
 
-    const char* getName(void) const {
-      return m_pName;
-    }
+	bool popDrawCmd(ICommand** ppCmd);
+	const char* getName(void) const;
 
   protected:
-    IState(const char* pName) : m_pName(pName) {}
+	IState(const char* pName);
+	void pushDrawCmd(ICommand* pCmd);
+
   private:
-    const char* m_pName;
+	const char* m_pName;
+	class DrawCmdQ* m_pDrawCmdQ;
 };
 
 #endif //_ISTATE_H_

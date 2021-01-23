@@ -3,7 +3,6 @@
 
 #include "IState.h"
 
-#include "efontTicker.h"
 #include "Preference.h"
 #include "YahooNewsReader.h"
 
@@ -13,10 +12,12 @@ class Home : public IState {
     virtual ~Home(void);
 
     virtual void onInitialized(void) override;
+    virtual void onTerminated(void) override;
 
     virtual StateID onLoop(void) override;
     virtual StateID onPressBtnA(bool isLong) override;
     virtual StateID onPressBtnC(bool isLong) override;
+    virtual StateID onBatteryChanged(bool isCharging, int8_t level) override;
 
   private:
     struct Rect_t {
@@ -25,14 +26,12 @@ class Home : public IState {
 
   private:
     YahooNewsReader::NewsReader m_NewsReader;
-    efontTicker m_etTitle;
-    efontTicker m_etDesc;
     int m_NewsIdx;
     int m_LoopCt;
     int m_WholeLoopCt;
     int m_ImgIdx;
-    int8_t m_PrevBatLv;
-    bool m_isPrevCharge;
+    int8_t m_BatteryLv;
+    bool m_isCharging;
     Preference m_Pref;
     Rect_t m_Rect;
     const char* m_pSSID;
@@ -47,5 +46,7 @@ class Home : public IState {
     void forward(void);
     void clean(void);
     bool findAccessPoint(void);
+    static void _renderCBR(bool isWrap, void* pUsrParam);
+    void renderCBR(bool isWrap);
 };
 #endif //_HOME_H_
