@@ -1,5 +1,6 @@
 # M5Stack News Reader
 It gets RSS from Yahoo! news, and shows them on M5Stack.
+![Image](view.jpg)
 * [ReadMe.ja.md](/ReadMe.ja.md)
 
 # Features
