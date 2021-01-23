@@ -1,5 +1,6 @@
 # M5Stack News Reader
 Yahoo!ニュースをRSSから取得し、M5Stackに表示します。
+![Image](view.jpg)
 * [README.md](/README.md)
 
 # 機能
