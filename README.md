@@ -23,6 +23,7 @@ It doesn't limit the number of access points, and background. But if it's too mu
 
 * When you push BtnA, it shows the current topic from head.
 * When you hold BtnA, it goes to power off.
+* When you push BtnB, it goes to menu. It can choose category of news. BtnA,C change the selection, and BtnB decides the category.
 * When you push BtnC, it show the next topic.
 * When you hold BtnC, it shows a QR code of the link of topic which is displayed.
 
