@@ -31,9 +31,8 @@ void Home::setCategory(const char* pCategory) {
 }
 
 void Home::onInitialized(void) {
-  bool isGetNews = false;
   if (m_Pref.isLoaded() == false) {
-    isGetNews = true;
+    m_isGetNews = true;
     if (m_Pref.load("/Preference.xml") == false) {
       drawStr(0, 0, F("Can't open Preference.xml"));
       for (;;) {
@@ -60,14 +59,11 @@ void Home::onInitialized(void) {
   if (s_pCategory != NULL) {
     if (strcmp(m_pCategory, s_pCategory) != 0) {
       m_pCategory = s_pCategory;
-      isGetNews = true;
+      m_isGetNews = true;
     }
   }
-
-  if (isGetNews) {
-    getNews();
-  }
 }
+
 void Home::onTerminated(void) {
   tickerDelete(TickerBase::TID_0);
   tickerDelete(TickerBase::TID_1);
@@ -80,6 +76,7 @@ void Home::clean(void) {
   m_ImgIdx = 0;
   m_BatteryLv = -1;
   m_isCharging = false;
+  m_isGetNews = false;
   m_Rect.x = 0;
   m_Rect.y = 0;
   m_Rect.width = 144;
@@ -114,6 +111,11 @@ void Home::renderCBR(bool isWrap) {
 }
 
 IState::StateID Home::onLoop(void) {
+  if (m_isGetNews) {
+    m_isGetNews = false;
+    getNews();
+  }
+
   tickerRender(TickerBase::TID_0, m_Rect.x, m_Rect.y);
   tickerRender(TickerBase::TID_1, m_Rect.x, (m_Rect.y + 20), _renderCBR, (void*)this);
 

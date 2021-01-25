@@ -35,6 +35,7 @@ class Home : public IState {
     int m_ImgIdx;
     int8_t m_BatteryLv;
     bool m_isCharging;
+    bool m_isGetNews;
     Preference m_Pref;
     Rect_t m_Rect;
     const char* m_pSSID;
