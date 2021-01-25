@@ -157,6 +157,10 @@ static void checkBattery(void) {
 void setup() {
   M5.begin();
   M5.Power.begin();
+
+  M5.Speaker.begin();
+  M5.Speaker.mute();
+
   M5.Lcd.clear();
   M5.Lcd.println(F("Now loading..."));
 
