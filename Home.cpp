@@ -11,7 +11,7 @@
 #define TFT_LIGHT_YELLOW COLOR565(250, 240, 139)
 #define TFT_BLACK COLOR565(0, 0, 0)
 
-#define LOOP_MAX (3)
+#define LOOP_MAX (2)
 #define WHOLE_LOOP_MAX (5)
 
 const char* s_pCategory = NULL;
