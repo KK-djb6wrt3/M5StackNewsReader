@@ -15,6 +15,7 @@ class ICommand {
       CmdID_FillRect,
       CmdID_FillRoundRect,
       CmdID_DrawStr,
+      CmdID_DrawStrJp,
       CmdID_SetTextColor,
       CmdID_DrawBmp,
       CmdID_DrawJpgFile,
@@ -79,6 +80,20 @@ class DrawStr : public ICommand {
   public:
     DrawStr(uint16_t x, uint16_t y, const char* pStr, uint16_t fontSz = 1U);
     DrawStr(uint16_t x, uint16_t y, const __FlashStringHelper* pHelper, uint16_t fontSz = 1U);
+    bool getParam(void** ppPtr, uint16_t* pX, uint16_t* pY, uint16_t* pFontSz) const;
+
+  private:
+    const uint16_t m_x, m_y;
+    const uint16_t m_fontSz;
+    void* const m_pPtr;
+    const bool m_isProgram;
+};
+
+///////////////////////////////////////////////////////////////////////////////
+class DrawStrJp : public ICommand {
+  public:
+    DrawStrJp(uint16_t x, uint16_t y, const char* pStr, uint16_t fontSz = 1U);
+    DrawStrJp(uint16_t x, uint16_t y, const __FlashStringHelper* pHelper, uint16_t fontSz = 1U);
     bool getParam(void** ppPtr, uint16_t* pX, uint16_t* pY, uint16_t* pFontSz) const;
 
   private:

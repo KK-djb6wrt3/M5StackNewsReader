@@ -3,10 +3,12 @@
 #include "Home.h"
 #include "Sleep.h"
 #include "QRCode.h"
+#include "Menu.h"
 
 static Home s_Home;
 static Sleep s_Sleep;
 static QRCode s_QRCode;
+static Menu s_Menu;
 
 const char* QRCode::m_pLink = NULL;
 
@@ -14,9 +16,10 @@ StateManager::StateManager(void) {
   m_pCurState = NULL;
 }
 
-void StateManager::begin(void) {
+void StateManager::begin(int lcdWidth, int lcdHeight) {
   if (m_pCurState == NULL) {
     m_pCurState = &s_Home;
+    m_pCurState->setLcdSize(lcdWidth, lcdHeight);
     m_pCurState->onInitialized();
   }
 }
@@ -55,7 +58,7 @@ void StateManager::onPressBtnC(bool isLong) {
   }
 }
 
-void StateManager::onBatteryChanged(bool isCharging, int8_t level){
+void StateManager::onBatteryChanged(bool isCharging, int8_t level) {
   if (m_pCurState != NULL) {
     changeState(m_pCurState->onBatteryChanged(isCharging, level));
   }
@@ -83,6 +86,10 @@ void StateManager::changeState(IState::StateID eID) {
       break;
     case IState::SID_QRCode:
       pNewState = &s_QRCode;
+      break;
+    case IState::SID_Menu:
+      pNewState = &s_Menu;
+      break;
     default:
       break;
   }

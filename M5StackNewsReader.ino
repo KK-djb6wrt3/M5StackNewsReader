@@ -26,13 +26,23 @@ static void drawStr(DrawStr* pCmd) {
   M5.Lcd.setTextSize(fontSz);
   if (isProgMem) {
     M5.Lcd.print((__FlashStringHelper*)pPtr);
-    Serial.print("FSH:");
-    Serial.println((__FlashStringHelper*)pPtr);
   }
   else {
     M5.Lcd.print((char*)pPtr);
-    Serial.print("char:");
-    Serial.println((char*)pPtr);
+  }
+}
+
+static void drawStrJp(DrawStrJp* pCmd) {
+  void* pPtr = NULL;
+  uint16_t x = 0U, y = 0U, fontSz = 0U;
+  bool isProgMem = pCmd->getParam(&pPtr, &x, &y, &fontSz);
+  M5.Lcd.setCursor(x, y);
+  M5.Lcd.setTextSize(fontSz);
+  if (isProgMem) {
+    //M5.Lcd.print((__FlashStringHelper*)pPtr);
+  }
+  else {
+    drawEfont(x, y, (char*)pPtr);
   }
 }
 
@@ -149,8 +159,8 @@ void setup() {
   M5.Power.begin();
   M5.Lcd.clear();
   M5.Lcd.println(F("Now loading..."));
-  
-  s_StateMgr.begin();
+
+  s_StateMgr.begin(M5.Lcd.width(), M5.Lcd.height());
 }
 
 void loop() {
@@ -197,6 +207,9 @@ void loop() {
         break;
       case ICommand::CmdID_DrawStr:
         drawStr((DrawStr*)pCmd);
+        break;
+      case ICommand::CmdID_DrawStrJp:
+        drawStrJp((DrawStrJp*)pCmd);
         break;
       case ICommand::CmdID_SetTextColor:
         setTextColor((SetTextColor*)pCmd);

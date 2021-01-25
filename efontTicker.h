@@ -3,6 +3,8 @@
 
 #include <M5Stack.h>
 
+void drawEfont(int x, int y, const char* pStr);
+
 class efontTicker {
   public:
     efontTicker(TFT_eSPI& lcd, int width, int height);

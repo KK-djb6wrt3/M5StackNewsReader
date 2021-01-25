@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Source>
+  <CategoryNum>9</CategoryNum>
+  <Category>
+    <Name>主要</Name>
+    <Link>/rss/topics/top-picks.xml</Link>
+  </Category>
+  <Category>
+    <Name>国内</Name>
+    <Link>/rss/topics/domestic.xml</Link>
+  </Category>
+  <Category>
+    <Name>国際</Name>
+    <Link>/rss/topics/world.xml</Link>
+  </Category>
+  <Category>
+    <Name>経済</Name>
+    <Link>/rss/topics/business.xml</Link>
+  </Category>
+  <Category>
+    <Name>エンタメ</Name>
+    <Link>/rss/topics/entertainment.xml</Link>
+  </Category>
+  <Category>
+    <Name>スポーツ</Name>
+    <Link>/rss/topics/sports.xml</Link>
+  </Category>
+  <Category>
+    <Name>IT</Name>
+    <Link>/rss/topics/it.xml</Link>
+  </Category>
+  <Category>
+    <Name>科学</Name>
+    <Link>/rss/topics/science.xml</Link>
+  </Category>
+  <Category>
+    <Name>地域</Name>
+    <Link>/rss/topics/local.xml</Link>
+  </Category>
+</Source>

@@ -9,7 +9,7 @@ class Sleep : public IState {
     virtual ~Sleep() {}
 
     virtual void onInitialized(void) override {
-    	pushDrawCmd(new PowerOff());
+    	powerOff();
     }
 
     virtual StateID onLoop(void) override {

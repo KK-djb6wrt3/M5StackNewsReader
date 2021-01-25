@@ -1,7 +1,73 @@
 #include "efontTicker.h"
 
+#include <M5Stack.h>
+
 #include <efontEnableJaMini.h>
 #include <efont.h>
+
+void drawEfont(int x, int y, const char* pStr) {
+  int posX = M5.Lcd.getCursorX();
+  int posY = M5.Lcd.getCursorY();
+  uint8_t textsize = M5.Lcd.textsize;
+  uint32_t textcolor = M5.Lcd.textcolor;
+  uint32_t textbgcolor = M5.Lcd.textbgcolor;
+
+  byte font[32];
+
+  while ( *pStr != 0x00 ) {
+    // 改行処理
+    if ( *pStr == '\n' ) {
+      // 改行
+      posY += 16 * textsize;
+      posX = M5.Lcd.getCursorX();
+      pStr++;
+      continue;
+    }
+
+    // フォント取得
+    uint16_t strUTF16;
+    pStr = efontUFT8toUTF16( &strUTF16, (char*)pStr );
+    getefontData( font, strUTF16 );
+
+    // 文字横幅
+    int width = 16 * textsize;
+    if ( strUTF16 < 0x0100 ) {
+      // 半角
+      width = 8 * textsize;
+    }
+
+    // 背景塗りつぶし
+    M5.Lcd.fillRect(posX, posY, width, 16 * textsize, textbgcolor);
+
+    // 取得フォントの確認
+    for (uint8_t row = 0; row < 16; row++) {
+      word fontdata = font[row * 2] * 256 + font[row * 2 + 1];
+      for (uint8_t col = 0; col < 16; col++) {
+        if ( (0x8000 >> col) & fontdata ) {
+          int drawX = posX + col * textsize;
+          int drawY = posY + row * textsize;
+          if ( textsize == 1 ) {
+            M5.Lcd.drawPixel(drawX, drawY, textcolor);
+          } else {
+            M5.Lcd.fillRect(drawX, drawY, textsize, textsize, textcolor);
+          }
+        }
+      }
+    }
+
+    // 描画カーソルを進める
+    posX += width;
+
+    // 折返し処理
+    if ( M5.Lcd.width() <= posX ) {
+      posX = 0;
+      posY += 16 * textsize;
+    }
+  }
+
+  // カーソルを更新
+  M5.Lcd.setCursor(posX, posY);
+}
 
 efontTicker::efontTicker(TFT_eSPI& lcd, int width, int height) : m_Sprite(&lcd) {
   m_Sprite.createSprite(width, height);

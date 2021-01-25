@@ -1,5 +1,13 @@
 #include "Command.h"
 
+ICommand::ICommand(CmdID eID)
+  : m_eCmdID(eID) {
+}
+
+ICommand::CmdID ICommand::getCmdID(void) const {
+  return m_eCmdID;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 PowerOff::PowerOff(void) : ICommand(CmdID_PowerOff) {}
 
@@ -18,19 +26,19 @@ FillRect::FillRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height, uint
 
 void FillRect::getParam(uint16_t* pX, uint16_t* pY, uint16_t* pWidth, uint16_t* pHeight, uint16_t* pColor) const {
   if (pX != NULL) {
-	*pX = m_x;
+    *pX = m_x;
   }
   if (pY != NULL) {
-	*pY = m_y;
+    *pY = m_y;
   }
   if (pWidth != NULL) {
-	*pWidth = m_width;
+    *pWidth = m_width;
   }
   if (pHeight != NULL) {
-	*pHeight = m_height;
+    *pHeight = m_height;
   }
   if (pColor != NULL) {
-	*pColor = m_color;
+    *pColor = m_color;
   }
 }
 
@@ -46,22 +54,22 @@ FillRoundRect::FillRoundRect(uint16_t x, uint16_t y, uint16_t width, uint16_t he
 
 void FillRoundRect::getParam(uint16_t* pX, uint16_t* pY, uint16_t* pWidth, uint16_t* pHeight, uint16_t* pCorner, uint16_t* pColor) const {
   if (pX != NULL) {
-	*pX = m_x;
+    *pX = m_x;
   }
   if (pY != NULL) {
-	*pY = m_y;
+    *pY = m_y;
   }
   if (pWidth != NULL) {
-	*pWidth = m_width;
+    *pWidth = m_width;
   }
   if (pHeight != NULL) {
-	*pHeight = m_height;
+    *pHeight = m_height;
   }
   if (pCorner != NULL) {
-	*pCorner = m_corner;
+    *pCorner = m_corner;
   }
   if (pColor != NULL) {
-	*pColor = m_color;
+    *pColor = m_color;
   }
 }
 
@@ -86,16 +94,51 @@ DrawStr::DrawStr(uint16_t x, uint16_t y, const __FlashStringHelper* pHelper, uin
 
 bool DrawStr::getParam(void** ppPtr, uint16_t* pX, uint16_t* pY, uint16_t* pFontSz) const {
   if (ppPtr != NULL) {
-	*ppPtr = m_pPtr;
+    *ppPtr = m_pPtr;
   }
   if (pX != NULL) {
-	*pX = m_x;
+    *pX = m_x;
   }
   if (pY != NULL) {
-	*pY = m_y;
+    *pY = m_y;
   }
   if (pFontSz != NULL) {
-	*pFontSz = m_fontSz;
+    *pFontSz = m_fontSz;
+  }
+  return m_isProgram;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+DrawStrJp::DrawStrJp(uint16_t x, uint16_t y, const char* pStr, uint16_t fontSz)
+  : ICommand(CmdID_DrawStrJp)
+  , m_isProgram(false)
+  , m_x(x)
+  , m_y(y)
+  , m_pPtr((void*)pStr)
+  , m_fontSz(fontSz) {
+}
+
+DrawStrJp::DrawStrJp(uint16_t x, uint16_t y, const __FlashStringHelper* pHelper, uint16_t fontSz)
+  : ICommand(CmdID_DrawStr)
+  , m_isProgram(false)
+  , m_x(x)
+  , m_y(y)
+  , m_pPtr((void*)pHelper)
+  , m_fontSz(fontSz) {
+}
+
+bool DrawStrJp::getParam(void** ppPtr, uint16_t* pX, uint16_t* pY, uint16_t* pFontSz) const {
+  if (ppPtr != NULL) {
+    *ppPtr = m_pPtr;
+  }
+  if (pX != NULL) {
+    *pX = m_x;
+  }
+  if (pY != NULL) {
+    *pY = m_y;
+  }
+  if (pFontSz != NULL) {
+    *pFontSz = m_fontSz;
   }
   return m_isProgram;
 }
@@ -109,10 +152,10 @@ SetTextColor::SetTextColor(uint16_t fore, uint16_t back)
 
 void SetTextColor::getParam(uint16_t* pFore, uint16_t* pBack) const {
   if (pFore != NULL) {
-	*pFore = m_fore;
+    *pFore = m_fore;
   }
   if (pBack != NULL) {
-	*pBack = m_back;
+    *pBack = m_back;
   }
 }
 
@@ -127,16 +170,16 @@ DrawBmp::DrawBmp(uint16_t x, uint16_t y, IconID eID, uint16_t transparent)
 
 void DrawBmp::getParam(IconID* peID, uint16_t* pX, uint16_t* pY, uint16_t* pTransParent) const {
   if (peID != NULL) {
-	*peID = m_eIconID;
+    *peID = m_eIconID;
   }
   if (pX != NULL) {
-	*pX = m_x;
+    *pX = m_x;
   }
   if (pY != NULL) {
-	*pY = m_y;
+    *pY = m_y;
   }
   if (pTransParent != NULL) {
-	*pTransParent = m_transparent;
+    *pTransParent = m_transparent;
   }
 }
 
@@ -151,16 +194,16 @@ DrawJpgFile::DrawJpgFile(STORAGE eStrg, const char* pPath, uint16_t x, uint16_t 
 
 void DrawJpgFile::getParam(STORAGE* peStrg, const char** ppPath, uint16_t* pX, uint16_t* pY) const {
   if (peStrg != NULL) {
-	*peStrg = m_eStrg;
+    *peStrg = m_eStrg;
   }
   if (ppPath != NULL) {
-	*ppPath = m_pPath;
+    *ppPath = m_pPath;
   }
   if (pX != NULL) {
-	*pX = m_x;
+    *pX = m_x;
   }
   if (pY != NULL) {
-	*pY = m_y;
+    *pY = m_y;
   }
 }
 
@@ -183,10 +226,10 @@ TickerCreate::TickerCreate(TickerID eTkrID, uint16_t width, uint16_t height)
 
 TickerBase::TickerID TickerCreate::getParam(uint16_t* pWidth, uint16_t* pHeight) const {
   if (pWidth != NULL) {
-	*pWidth = m_width;
+    *pWidth = m_width;
   }
   if (pHeight != NULL) {
-	*pHeight = m_height;
+    *pHeight = m_height;
   }
   return getTkrID();
 }
@@ -204,7 +247,7 @@ TickerSetText::TickerSetText(TickerID eTkrID, const char* pStr)
 
 TickerBase::TickerID TickerSetText::getParam(const char** ppStr) {
   if (ppStr != NULL) {
-	*ppStr = m_pStr;
+    *ppStr = m_pStr;
   }
   return getTkrID();
 }
@@ -220,13 +263,13 @@ TickerSetParam::TickerSetParam(TickerID eTkrID, uint8_t scale, uint16_t fore, ui
 
 TickerBase::TickerID TickerSetParam::getParam(uint8_t* pScale, uint16_t* pFore, uint16_t* pBack) const {
   if (pScale != NULL) {
-	*pScale = m_scale;
+    *pScale = m_scale;
   }
   if (pFore != NULL) {
-	*pFore = m_fore;
+    *pFore = m_fore;
   }
   if (pBack != NULL) {
-	*pBack = m_back;
+    *pBack = m_back;
   }
   return getTkrID();
 }
@@ -243,17 +286,17 @@ TickerRender::TickerRender(TickerID eTkrID, uint16_t x, uint16_t y, RenderCBR pC
 
 TickerBase::TickerID TickerRender::getParam(uint16_t* pX, uint16_t* pY) const {
   if (pX != NULL) {
-	*pX = m_x;
+    *pX = m_x;
   }
   if (pY != NULL) {
-	*pY = m_y;
+    *pY = m_y;
   }
   return getTkrID();
 }
 
 void TickerRender::callback(bool isWrap) const {
   if (m_pCBR != NULL) {
-	(*m_pCBR)(isWrap, m_pUsrParam);
+    (*m_pCBR)(isWrap, m_pUsrParam);
   }
 }
 
@@ -269,7 +312,7 @@ DrawQrCode::DrawQrCode(const char* pStr)
 }
 
 void DrawQrCode::getParam(const char** ppStr) const {
-	if(ppStr != NULL) {
-		*ppStr = m_pStr;
-	}
+  if (ppStr != NULL) {
+    *ppStr = m_pStr;
+  }
 }

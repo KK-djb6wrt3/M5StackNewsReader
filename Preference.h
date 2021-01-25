@@ -1,10 +1,6 @@
 #ifndef _PREFERENCE_H_
 #define _PREFERENCE_H_
 
-#include <expat.h>
-#include <vector>
-#include <wstring.h>
-
 class Preference {
   public:
     enum BalloonPos {

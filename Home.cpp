@@ -8,19 +8,26 @@
 #include "Utility.h"
 #include "QRCode.h"
 
-#define COLOR565(r, g, b) (((r) & 0xF8) << 8) | (((g) & 0xFC) << 3) | ((b) >> 3)
 #define TFT_LIGHT_YELLOW COLOR565(250, 240, 139)
 #define TFT_BLACK COLOR565(0, 0, 0)
 
 #define LOOP_MAX (3)
 #define WHOLE_LOOP_MAX (5)
 
+const char* s_pCategory = NULL;
+
 Home::Home(void)
   : IState("Home") {
+  m_pCategory = "/rss/topics/top-picks.xml";
   clean();
 }
 
 Home::~Home(void) {
+}
+
+void Home::setCategory(const char* pCategory) {
+  SAFE_DELARY(s_pCategory);
+  s_pCategory = duplicateString(pCategory);
 }
 
 void Home::onInitialized(void) {
@@ -28,35 +35,42 @@ void Home::onInitialized(void) {
   if (m_Pref.isLoaded() == false) {
     isGetNews = true;
     if (m_Pref.load("/Preference.xml") == false) {
-      pushDrawCmd(new DrawStr(0, 0, F("Can't open Preference.xml")));
+      drawStr(0, 0, F("Can't open Preference.xml"));
       for (;;) {
         delay(portMAX_DELAY);
       }
     }
     if (findAccessPoint() == false) {
-      pushDrawCmd(new DrawStr(0, 0, F("Can't find any access points to connect.")));
+      drawStr(0, 0, F("Can't find any access points to connect."));
       for (;;) {
         delay(portMAX_DELAY);
       }
     }
   }
 
-  pushDrawCmd(new TickerCreate(TickerBase::TID_0, 144, 16));
-  pushDrawCmd(new TickerSetParam(TickerBase::TID_0, 1, TFT_BLACK, TFT_LIGHT_YELLOW));
+  tickerCreate(TickerBase::TID_0, 144, 16);
+  tickerSetParam(TickerBase::TID_0, 1, TFT_BLACK, TFT_LIGHT_YELLOW);
 
-  pushDrawCmd(new TickerCreate(TickerBase::TID_1, 144, 32));
-  pushDrawCmd(new TickerSetParam(TickerBase::TID_1, 2, TFT_BLACK, TFT_LIGHT_YELLOW));
+  tickerCreate(TickerBase::TID_1, 144, 32);
+  tickerSetParam(TickerBase::TID_1, 2, TFT_BLACK, TFT_LIGHT_YELLOW);
 
-  pushDrawCmd(new SetTextColor(TFT_BLACK, TFT_LIGHT_YELLOW));
+  setTextColor(TFT_BLACK, TFT_LIGHT_YELLOW);
   loadImage();
+
+  if (s_pCategory != NULL) {
+    if (strcmp(m_pCategory, s_pCategory) != 0) {
+      m_pCategory = s_pCategory;
+      isGetNews = true;
+    }
+  }
 
   if (isGetNews) {
     getNews();
   }
 }
 void Home::onTerminated(void) {
-  pushDrawCmd(new TickerDelete(TickerBase::TID_0));
-  pushDrawCmd(new TickerDelete(TickerBase::TID_1));
+  tickerDelete(TickerBase::TID_0);
+  tickerDelete(TickerBase::TID_1);
 }
 
 void Home::clean(void) {
@@ -100,8 +114,8 @@ void Home::renderCBR(bool isWrap) {
 }
 
 IState::StateID Home::onLoop(void) {
-  pushDrawCmd(new TickerRender(TickerBase::TID_0, m_Rect.x, m_Rect.y));
-  pushDrawCmd(new TickerRender(TickerBase::TID_1, m_Rect.x, (m_Rect.y + 20), _renderCBR, (void*)this));
+  tickerRender(TickerBase::TID_0, m_Rect.x, m_Rect.y);
+  tickerRender(TickerBase::TID_1, m_Rect.x, (m_Rect.y + 20), _renderCBR, (void*)this);
 
   drawBattery();
   return SID_Current;
@@ -109,9 +123,13 @@ IState::StateID Home::onLoop(void) {
 
 IState::StateID Home::onPressBtnA(bool isLong) {
   m_LoopCt = 0;
-  pushDrawCmd(new TickerResetPos(TickerBase::TID_0));
-  pushDrawCmd(new TickerResetPos(TickerBase::TID_1));
+  tickerResetPos(TickerBase::TID_0);
+  tickerResetPos(TickerBase::TID_1);
   return isLong ? SID_Sleep : SID_Current;
+}
+
+IState::StateID Home::onPressBtnB(bool isLong) {
+  return isLong ? SID_Current : SID_Menu;
 }
 
 IState::StateID Home::onPressBtnC(bool isLong) {
@@ -177,8 +195,8 @@ void Home::nextNews(void) {
     const char* pDesc = NULL;
     const char* pLink = NULL;
     if (m_NewsReader.getEntry(m_NewsIdx, &pTitle, &pDesc, &pLink)) {
-      pushDrawCmd(new TickerSetText(TickerBase::TID_0, pTitle));
-      pushDrawCmd(new TickerSetText(TickerBase::TID_1, pDesc));
+      tickerSetText(TickerBase::TID_0, pTitle);
+      tickerSetText(TickerBase::TID_1, pDesc);
     }
     QRCode::setLink(pLink);
 
@@ -186,7 +204,7 @@ void Home::nextNews(void) {
     Rect_t rcStat = {};
     getStatusArea(&rcStat);
     sprintf(spStr, "%u/%u", (m_NewsIdx + 1), num);
-    pushDrawCmd(new DrawStr(rcStat.x, rcStat.y, spStr));
+    drawStr(rcStat.x, rcStat.y, spStr);
 
     if (++m_NewsIdx >= num) {
       m_NewsIdx = 0;
@@ -221,8 +239,8 @@ void Home::drawBattery(void) {
     const int w = 16;
     const int h = 8;
 
-    pushDrawCmd(new FillRect(x, y, w, h, TFT_LIGHT_YELLOW));
-    pushDrawCmd(new DrawBmp(x, y, eID, 0xF81F));
+    fillRect(x, y, w, h, TFT_LIGHT_YELLOW);
+    drawBmp(x, y, eID, 0xF81F);
   }
 }
 
@@ -232,7 +250,7 @@ void Home::loadImage(void) {
     const char* pFile = NULL;
     Preference::BalloonPos ePos = Preference::BP_LeftTop;
     if (m_Pref.getImage(m_ImgIdx, &pFile, &ePos)) {
-      pushDrawCmd(new DrawJpgFile(DrawJpgFile::SD, pFile));
+      drawJpgFile(DrawJpgFile::SD, pFile);
       switch (ePos) {
         case Preference::BP_LeftBottom:
           m_Rect.x = 10;
@@ -251,7 +269,7 @@ void Home::loadImage(void) {
           m_Rect.y = 20;
           break;
       }
-      pushDrawCmd(new FillRoundRect(m_Rect.x, (m_Rect.y - 10), m_Rect.width, (m_Rect.height + 25), 10, TFT_LIGHT_YELLOW));
+      fillRoundRect(m_Rect.x, (m_Rect.y - 10), m_Rect.width, (m_Rect.height + 25), 10, TFT_LIGHT_YELLOW);
       drawBattery();
     }
     if (++m_ImgIdx >= imgNum) {
@@ -267,7 +285,7 @@ bool Home::getNews(void) {
     while (WiFi.status() != WL_CONNECTED) {
       delay(500);
     }
-    m_NewsReader.read("/rss/topics/top-picks.xml");
+    m_NewsReader.read(m_pCategory);
     WiFi.disconnect(true);
     m_NewsIdx = 0;
     nextNews();

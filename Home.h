@@ -16,8 +16,11 @@ class Home : public IState {
 
     virtual StateID onLoop(void) override;
     virtual StateID onPressBtnA(bool isLong) override;
+    virtual StateID onPressBtnB(bool isLong) override;
     virtual StateID onPressBtnC(bool isLong) override;
     virtual StateID onBatteryChanged(bool isCharging, int8_t level) override;
+
+    static void setCategory(const char* pLink);
 
   private:
     struct Rect_t {
@@ -36,6 +39,7 @@ class Home : public IState {
     Rect_t m_Rect;
     const char* m_pSSID;
     const char* m_pPassword;
+    const char* m_pCategory;
 
   private:
     void getStatusArea(Rect_t* pRect);

@@ -1,6 +1,9 @@
 #include "Preference.h"
 #include "Utility.h"
 
+#include <expat.h>
+#include <vector>
+#include <wstring.h>
 #include <FS.h>
 #include <SD.h>
 
