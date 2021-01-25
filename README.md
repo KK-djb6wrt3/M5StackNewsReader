@@ -12,8 +12,8 @@ It also shows battery status.
 * [efont](https://github.com/tanakamasayuki/efont.git)
 
 # Usage
-You must place 'Source.xml' on root of microSD.
-You must change 'Preference.xml', and place it on root of microSD.
+* You must place 'Source.xml' on root of microSD.
+* You must change 'Preference.xml', and place it on root of microSD.
 ```
 <SSID> #SSID of an access point which you want to connect
 <Password> #Password

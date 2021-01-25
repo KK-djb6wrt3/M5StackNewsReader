@@ -12,8 +12,8 @@ Yahoo!ニュースの主要トピックを取得し、タイトルと詳細を�
 * [efont](https://github.com/tanakamasayuki/efont.git)
 
 # 使用方法
-Source.xmlをmicroSDのルートフォルダに置く必要があります。
-Preference.xmlを変更し、microSDのルートフォルダに置く必要があります。
+* Source.xmlをmicroSDのルートフォルダに置く必要があります。
+* Preference.xmlを変更し、microSDのルートフォルダに置く必要があります。
 ```
 <SSID> #アクセスポイントのSSID
 <Password> #パスワード
